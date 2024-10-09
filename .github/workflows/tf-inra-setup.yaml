@@ -1,0 +1,28 @@
+name: TF CI workflow
+ 
+on:
+  pull_request:
+    branches:
+      - main
+ 
+jobs:
+  tf-infra-setup:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+ 
+      - name: Terraform setup
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.9.0
+ 
+      - name: Terraform init
+        run: terraform init
+ 
+      - name: Terraform format check
+        run: terraform fmt -check -recursive
+ 
+      - name: Terraform validation
+        run: terraform validate
