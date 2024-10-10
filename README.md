@@ -22,6 +22,8 @@ This Terraform configuration will set up the following AWS resources:
 6. A private route table for the private subnets.
 7. Required associations between route tables and subnets.
 
+NOTE: availability zones will be fetched dynamically. The CIDR for the subnets will also be calculated dynamically for the available zones
+
 ## Terraform Commands
 
 - `terraform init`
