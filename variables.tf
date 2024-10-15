@@ -1,7 +1,7 @@
-variable "aws_region" {
-  type        = string
-  description = "value of AWS Region to deploy resources"
-}
+#variable "aws_region" {
+#  type        = string
+#  description = "value of AWS Region to deploy resources"
+#}
 
 variable "vpc_cidr" {
   type        = string
