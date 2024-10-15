@@ -11,7 +11,7 @@ resource "aws_internet_gateway" "igw" {
 
 # create public subnets
 resource "aws_subnet" "public_subnets" {
-  count                   = length(local.selected_zones)
+  count                   =    length(local.selected_zones)
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 4, count.index)
   availability_zone       = local.selected_zones[count.index]
