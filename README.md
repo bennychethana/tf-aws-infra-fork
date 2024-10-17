@@ -24,6 +24,10 @@ This Terraform configuration will set up the following AWS resources:
 
 NOTE: availability zones will be fetched dynamically. The CIDR for the subnets will also be calculated dynamically for the available zones
 
+## A04
+
+Adding an ec2 resource which will launched with the custom image we built using packer
+
 ## Terraform Commands
 
 - `terraform init`
