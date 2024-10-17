@@ -17,3 +17,8 @@ variable "internet_gateway_name" {
   type        = string
   description = "value of internet gateway"
 }
+
+variable "ami_id" {
+  type        = string
+  description = "value of ami id"
+}
