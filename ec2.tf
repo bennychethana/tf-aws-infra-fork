@@ -55,5 +55,5 @@ resource "aws_instance" "webapp_instance" {
     Name = "webapp_instance"
   }
 
-  depends_on = [aws_internet_gateway.igw, aws_subnet.public_subnets]
+  depends_on = [aws_internet_gateway.igw, aws_subnet.public_subnets, aws_security_group.webapp_security_group]
 }
