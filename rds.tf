@@ -9,13 +9,6 @@ resource "aws_security_group" "rds_security_group" {
     security_groups = [aws_security_group.webapp_security_group.id] # Only allow access from the webapp security group
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = {
     Name = "rds_security_group"
   }
