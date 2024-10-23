@@ -29,6 +29,13 @@ resource "aws_security_group" "webapp_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name = "application security group"
   }
@@ -43,6 +50,26 @@ resource "aws_instance" "webapp_instance" {
   vpc_security_group_ids      = [aws_security_group.webapp_security_group.id]
   associate_public_ip_address = true
 
+  user_data = <<-EOF
+              #!/bin/bash
+              echo "DATABASE_HOST=${split(":", aws_db_instance.rds_instance.endpoint)[0]}" >> /etc/environment
+              echo "DATABASE_USER=csye6225" >> /etc/environment
+              echo "DATABASE_PASSWORD=password" >> /etc/environment
+              echo "DATABASE_NAME=csye6225" >> /etc/environment
+
+              # Source the new environment variables
+              source /etc/environment
+
+              # Run migrations as csye6225 user
+              sudo -u csye6225 bash -c 'source /home/csye6225/webapp/venv/bin/activate && python3 /home/csye6225/webapp/manage.py makemigrations && python3 /home/csye6225/webapp/manage.py migrate'
+
+              # Reload and restart services
+              systemctl daemon-reload
+              systemctl enable webapp.service
+              systemctl restart webapp.service
+
+              EOF
+
   root_block_device {
     volume_size           = 25
     volume_type           = "gp2"
@@ -55,5 +82,5 @@ resource "aws_instance" "webapp_instance" {
     Name = "webapp_instance"
   }
 
-  depends_on = [aws_internet_gateway.igw, aws_subnet.public_subnets, aws_security_group.webapp_security_group]
+  depends_on = [aws_internet_gateway.igw, aws_subnet.public_subnets, aws_security_group.webapp_security_group, aws_db_instance.rds_instance]
 }
