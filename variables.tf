@@ -22,3 +22,61 @@ variable "ami_id" {
   type        = string
   description = "value of ami id"
 }
+
+variable "ec2_instance_type" {
+  description = "EC2 instance type"
+  type        = string
+}
+
+variable "ec2_volume_type" {
+  description = "EC2 volume type"
+  type        = string
+}
+
+variable "ec2_intance_volume_size" {
+  description = "EC2 instance volume size"
+  type        = number
+}
+
+variable "rds_password" {
+  description = "Password for the PostgreSQL database"
+  type        = string
+  sensitive   = true
+}
+
+variable "rds_name" {
+  description = "Database name"
+  type        = string
+}
+
+variable "rds_username" {
+  description = "Database username"
+  type        = string
+}
+
+variable "rds_port" {
+  description = "Database port"
+  type        = number
+  default     = 5432
+
+}
+
+variable "rds_instance_class" {
+  description = "RDS instance class"
+  type        = string
+}
+
+variable "rds_engine" {
+  description = "RDS engine"
+  type        = string
+}
+
+variable "rds_instance_identifier" {
+  description = "RDS identifier"
+  type        = string
+}
+
+variable "rds_allocated_storage" {
+  description = "RDS storage size"
+  type        = number
+}

@@ -33,18 +33,29 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
   }
 }
 
+resource "aws_db_parameter_group" "db_parameter_group" {
+  name        = "postgres-db-parameter-group"
+  family      = "postgres16"
+  description = "Custom parameter group for PostgreSQL DB instance"
+
+  tags = {
+    Name = "postgres-db-parameter-group"
+  }
+}
+
 # Create the RDS instance for PostgreSQL
 resource "aws_db_instance" "rds_instance" {
-  identifier             = "csye6225"
-  engine                 = "postgres"    # PostgreSQL engine
-  instance_class         = "db.t3.micro" # Cheapest instance type
-  allocated_storage      = 20
-  db_name                = "csye6225"
-  username               = "csye6225"
-  password               = "password"
+  identifier             = var.rds_instance_identifier
+  engine                 = var.rds_engine
+  instance_class         = var.rds_instance_class
+  allocated_storage      = var.rds_allocated_storage
+  db_name                = var.rds_name
+  username               = var.rds_username
+  password               = var.rds_password
+  parameter_group_name   = aws_db_parameter_group.db_parameter_group.name
   vpc_security_group_ids = [aws_security_group.rds_security_group.id]
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
-  publicly_accessible    = false # Not exposed to the public internet
+  publicly_accessible    = false
   skip_final_snapshot    = true
 
   tags = {

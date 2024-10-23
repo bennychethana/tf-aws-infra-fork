@@ -45,17 +45,18 @@ resource "aws_security_group" "webapp_security_group" {
 
 resource "aws_instance" "webapp_instance" {
   ami                         = var.ami_id
-  instance_type               = "t2.small"
+  instance_type               = var.ec2_instance_type
   subnet_id                   = aws_subnet.public_subnets[0].id
   vpc_security_group_ids      = [aws_security_group.webapp_security_group.id]
   associate_public_ip_address = true
 
   user_data = <<-EOF
               #!/bin/bash
-              echo "DATABASE_HOST=${split(":", aws_db_instance.rds_instance.endpoint)[0]}" >> /etc/environment
-              echo "DATABASE_USER=csye6225" >> /etc/environment
-              echo "DATABASE_PASSWORD=password" >> /etc/environment
-              echo "DATABASE_NAME=csye6225" >> /etc/environment
+              echo "DATABASE_HOST='${aws_db_instance.rds_instance.address}'" >> /etc/environment
+              echo "DATABASE_USER='${var.rds_username}'" >> /etc/environment
+              echo "DATABASE_PASSWORD='${var.rds_password}'" >> /etc/environment
+              echo "DATABASE_NAME='${var.rds_name}'" >> /etc/environment
+              echo "DATABASE_PORT='${var.rds_port}'" >> /etc/environment
 
               # Source the new environment variables
               source /etc/environment
@@ -71,8 +72,8 @@ resource "aws_instance" "webapp_instance" {
               EOF
 
   root_block_device {
-    volume_size           = 25
-    volume_type           = "gp2"
+    volume_size           = var.ec2_intance_volume_size
+    volume_type           = var.ec2_volume_type
     delete_on_termination = true
   }
 
