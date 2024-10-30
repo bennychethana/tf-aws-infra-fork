@@ -89,8 +89,4 @@ variable "domain_name" {
 variable "environment" {
   type        = string
   description = "Environment prefix (dev or demo)"
-  validation {
-    condition     = contains(["dev", "demo"], var.environment)
-    error_message = "Environment must be either 'dev' or 'demo'."
-  }
 }

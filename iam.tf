@@ -33,9 +33,9 @@ resource "aws_iam_instance_profile" "cloudwatch_agent_profile" {
 #   depends_on = [
 #     aws_s3_bucket.webapp_bucket
 #   ]
- 
+
 #   name = "WebAppPolicy"
- 
+
 #   policy = jsonencode(
 #     {
 #       "Version" : "2012-10-17",
@@ -56,14 +56,14 @@ resource "aws_iam_instance_profile" "cloudwatch_agent_profile" {
 #     }
 #   )
 # }
- 
+
 # resource "aws_iam_role" "CSYE6225_Role" {
 #   name = "CSYE6225_Role"
- 
+
 #   depends_on = [
 #     aws_s3_bucket.webapp_bucket
 #   ]
- 
+
 #   assume_role_policy = <<EOF
 #     {
 #         "Version": "2012-10-17",
@@ -79,22 +79,22 @@ resource "aws_iam_instance_profile" "cloudwatch_agent_profile" {
 #         ]
 #     }
 # EOF
- 
+
 #   tags = {
 #     "Name" = "csye6225_role"
 #   }
 # }
- 
+
 # resource "aws_iam_role_policy_attachment" "policy-attach" {
 #   role       = aws_iam_role.CSYE6225_Role.name
 #   policy_arn = aws_iam_policy.CSYE6225_Custome_Policy.arn
 # }
- 
+
 # resource "aws_iam_role_policy_attachment" "policy-attach2" {
 #   role       = aws_iam_role.CSYE6225_Role.name
 #   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 # }
- 
+
 # resource "aws_iam_instance_profile" "CSYE6225-profile" {
 #   name = "iam-profile"
 #   role = aws_iam_role.CSYE6225_Role.name
