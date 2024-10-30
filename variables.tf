@@ -80,3 +80,17 @@ variable "rds_allocated_storage" {
   description = "RDS storage size"
   type        = number
 }
+
+variable "domain_name" {
+  type        = string
+  description = "The domain name for the application (e.g., example.com)"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment prefix (dev or demo)"
+  validation {
+    condition     = contains(["dev", "demo"], var.environment)
+    error_message = "Environment must be either 'dev' or 'demo'."
+  }
+}

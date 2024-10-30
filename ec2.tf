@@ -49,25 +49,90 @@ resource "aws_instance" "webapp_instance" {
   subnet_id                   = aws_subnet.public_subnets[0].id
   vpc_security_group_ids      = [aws_security_group.webapp_security_group.id]
   associate_public_ip_address = true
+  iam_instance_profile        = aws_iam_instance_profile.cloudwatch_agent_profile.name
 
   user_data = <<-EOF
               #!/bin/bash
+
+              LOG_FILE="/home/csye6225/webapp/logs/user-data-log.txt"
+
+              echo "Starting user data script..." >> "$LOG_FILE"
+              echo "Setting environment variables..." >> "$LOG_FILE"
+
+              # Set RDS credentials in environment
               echo "DATABASE_HOST='${aws_db_instance.rds_instance.address}'" >> /etc/environment
               echo "DATABASE_USER='${var.rds_username}'" >> /etc/environment
               echo "DATABASE_PASSWORD='${var.rds_password}'" >> /etc/environment
               echo "DATABASE_NAME='${var.rds_name}'" >> /etc/environment
               echo "DATABASE_PORT='${var.rds_port}'" >> /etc/environment
 
+              # Set S3 Bucket Name in environment
+              echo "S3_BUCKET_NAME='${aws_s3_bucket.webapp_bucket.bucket}'" >> /etc/environment
+
+              echo "Done setting environment variables..." >> "$LOG_FILE"
+
+              echo "Activate env..." >> "$LOG_FILE"
               # Source the new environment variables
               source /etc/environment
 
+              echo "Run migrations..." >> "$LOG_FILE"
               # Run migrations as csye6225 user
               sudo -u csye6225 bash -c 'source /home/csye6225/webapp/venv/bin/activate && python3 /home/csye6225/webapp/manage.py makemigrations && python3 /home/csye6225/webapp/manage.py migrate'
 
+              echo "Reload and restart services..." >> "$LOG_FILE"
               # Reload and restart services
               systemctl daemon-reload
               systemctl enable webapp.service
               systemctl restart webapp.service
+
+              echo "Configure CloudWatch Agent..." >> "$LOG_FILE"
+              # Configure CloudWatch Agent
+              sudo mkdir -p /opt/aws/amazon-cloudwatch-agent/etc
+              sudo tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json > /dev/null << 'EOT'
+              {
+                "agent": {
+                  "metrics_collection_interval": 60,
+                  "run_as_user": "root"
+                },
+                "logs": {
+                  "logs_collected": {
+                    "files": {
+                      "collect_list": [
+                        {
+                          "file_path": "/home/csye6225/webapp/logs/webapp.log",
+                          "log_group_name": "/webapp/application",
+                          "log_stream_name": "{instance_id}",
+                          "timestamp_format": "%Y-%m-%d %H:%M:%S"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "metrics": {
+                  "metrics_collected": {
+                    "cpu": {
+                      "measurement": ["cpu_usage_idle", "cpu_usage_user", "cpu_usage_system"],
+                      "metrics_collection_interval": 60
+                    },
+                    "disk": {
+                      "measurement": ["used_percent"],
+                      "metrics_collection_interval": 60,
+                      "resources": ["*"]
+                    },
+                    "mem": {
+                      "measurement": ["mem_used_percent"],
+                      "metrics_collection_interval": 60
+                    }
+                  }
+                }
+              }
+              EOT
+
+              echo "Start CloudWatch agent with new configuration..." >> "$LOG_FILE"
+              # Start CloudWatch agent with new configuration
+              sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+              sudo systemctl restart amazon-cloudwatch-agent
+
 
               EOF
 
