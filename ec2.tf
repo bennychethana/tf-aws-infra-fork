@@ -100,7 +100,7 @@ resource "aws_instance" "webapp_instance" {
       echo "Running migrations..." >> "$LOG_FILE"
       # Run migrations as csye6225 user
       sudo -u csye6225 bash -c 'source /home/csye6225/webapp/venv/bin/activate && python3 /home/csye6225/webapp/manage.py makemigrations && python3 /home/csye6225/webapp/manage.py migrate' >> "$LOG_FILE" 2>&1 || echo "Error running migrations" >> "$LOG_FILE"
- 
+
       echo "Reloading and restarting services..." >> "$LOG_FILE"
       # Reload and restart services
       systemctl daemon-reload || echo "Error reloading systemd" >> "$LOG_FILE"
@@ -131,7 +131,12 @@ resource "aws_instance" "webapp_instance" {
           }
         },
         "metrics": {
+          "namespace": "CustomAppMetrics",
           "metrics_collected": {
+            "statsd": {
+              "service_address": ":8125",
+              "metrics_collection_interval": 60
+            },
             "cpu": {
               "measurement": ["cpu_usage_idle", "cpu_usage_user", "cpu_usage_system"],
               "metrics_collection_interval": 60

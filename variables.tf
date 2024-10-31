@@ -85,8 +85,3 @@ variable "domain_name" {
   type        = string
   description = "The domain name for the application (e.g., example.com)"
 }
-
-variable "environment" {
-  type        = string
-  description = "Environment prefix (dev or demo)"
-}
