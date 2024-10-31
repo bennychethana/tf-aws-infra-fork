@@ -80,3 +80,8 @@ variable "rds_allocated_storage" {
   description = "RDS storage size"
   type        = number
 }
+
+variable "domain_name" {
+  type        = string
+  description = "The domain name for the application (e.g., example.com)"
+}
