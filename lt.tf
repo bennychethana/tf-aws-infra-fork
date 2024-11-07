@@ -106,6 +106,7 @@ resource "aws_launch_template" "webapp_launch_template" {
   name_prefix   = "webapp-launch-template-"
   image_id      = var.ami_id
   instance_type = var.ec2_instance_type
+  key_name      = var.key_name
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_profile.name
@@ -120,7 +121,7 @@ resource "aws_launch_template" "webapp_launch_template" {
   user_data = base64encode(local.user_data_script)
 
   block_device_mappings {
-    device_name = "/dev/xvda" # or "/dev/sda1" depending on your AMI
+    device_name = "/dev/xvda"
     ebs {
       volume_size           = var.ec2_intance_volume_size
       volume_type           = var.ec2_volume_type

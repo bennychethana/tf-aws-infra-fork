@@ -31,8 +31,8 @@ resource "aws_cloudwatch_metric_alarm" "scale_up" {
   namespace           = "AWS/EC2"
   period              = "60"
   statistic           = "Average"
-  threshold           = "5"
-  alarm_description   = "Alarm when CPU exceeds 5%"
+  threshold           = var.scaleup_threshold
+  alarm_description   = "Alarm when CPU exceeds 10%"
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.webapp_asg.name
   }
@@ -48,8 +48,8 @@ resource "aws_cloudwatch_metric_alarm" "scale_down" {
   namespace           = "AWS/EC2"
   period              = "60"
   statistic           = "Average"
-  threshold           = "3"
-  alarm_description   = "Alarm when CPU is below 3%"
+  threshold           = var.scaledown_threshold
+  alarm_description   = "Alarm when CPU is below 7%"
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.webapp_asg.name
   }
