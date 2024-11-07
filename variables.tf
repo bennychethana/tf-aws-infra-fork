@@ -85,3 +85,18 @@ variable "domain_name" {
   type        = string
   description = "The domain name for the application (e.g., example.com)"
 }
+
+variable "key_name" {
+  type        = string
+  description = "The name of the EC2 key pair to use"
+}
+
+variable "scaleup_threshold" {
+  type        = number
+  description = "The threshold for scaling up"
+}
+
+variable "scaledown_threshold" {
+  type        = number
+  description = "The threshold for scaling down"
+}
