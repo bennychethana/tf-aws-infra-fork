@@ -26,6 +26,7 @@ locals {
         echo "DATABASE_NAME='${var.rds_name}'" >> /etc/environment
         echo "DATABASE_PORT='${var.rds_port}'" >> /etc/environment
         echo "S3_BUCKET_NAME='${aws_s3_bucket.webapp_bucket.bucket}'" >> /etc/environment
+        echo "SNS_TOPIC_ARN='${aws_sns_topic.user_verification_topic.arn}'" >> /etc/environment
       } || echo "Error setting environment variables" >> "$LOG_FILE"
 
       echo "Activating environment..." >> "$LOG_FILE"
@@ -103,7 +104,7 @@ locals {
 }
 
 resource "aws_launch_template" "webapp_launch_template" {
-  name_prefix   = "webapp-launch-template-"
+  name          = "webapp-launch-template"
   image_id      = var.ami_id
   instance_type = var.ec2_instance_type
   key_name      = var.key_name

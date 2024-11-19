@@ -100,3 +100,34 @@ variable "scaledown_threshold" {
   type        = number
   description = "The threshold for scaling down"
 }
+
+variable "sns_topic_name" {
+  description = "Name of the SNS topic"
+  type        = string
+}
+ 
+variable "lambda_function_name" {
+  description = "Name of the Lambda function"
+  type        = string
+}
+ 
+variable "lambda_function_handler" {
+  description = "Lambda function handler"
+  type        = string
+}
+ 
+variable "lambda_function_runtime" {
+  description = "Lambda function runtime"
+  type        = string
+}
+ 
+variable "lambda_file_path" {
+  description = "Path to the Lambda function code"
+  type        = string
+}
+ 
+variable "sendgrid_api_key" {
+  description = "SendGrid API key"
+  type        = string
+  sensitive   = true
+}
