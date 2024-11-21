@@ -1,4 +1,5 @@
 resource "aws_autoscaling_group" "webapp_asg" {
+  name                = "webapp-asg"
   desired_capacity    = 3
   min_size            = 3
   max_size            = 5
