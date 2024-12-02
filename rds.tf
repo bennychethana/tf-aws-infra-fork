@@ -36,20 +36,46 @@ resource "aws_db_parameter_group" "db_parameter_group" {
   }
 }
 
+resource "random_password" "db_password" {
+  length  = 16
+  special = false
+  # override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+# Secret for RDS Database Password
+resource "aws_secretsmanager_secret" "db_password" {
+  name                    = "rds-db-password-fixed"
+  recovery_window_in_days = 0
+  kms_key_id              = aws_kms_key.db_secrets_key.key_id
+}
+
+resource "aws_secretsmanager_secret_version" "db_password" {
+  secret_id = aws_secretsmanager_secret.db_password.id
+  secret_string = jsonencode({
+    username = "admin"
+    password = random_password.db_password.result
+  })
+}
+
 # Create the RDS instance for PostgreSQL
 resource "aws_db_instance" "rds_instance" {
-  identifier             = var.rds_instance_identifier
-  engine                 = var.rds_engine
-  instance_class         = var.rds_instance_class
-  allocated_storage      = var.rds_allocated_storage
-  db_name                = var.rds_name
-  username               = var.rds_username
-  password               = var.rds_password
+  identifier        = var.rds_instance_identifier
+  engine            = var.rds_engine
+  instance_class    = var.rds_instance_class
+  allocated_storage = var.rds_allocated_storage
+  db_name           = var.rds_name
+  username          = var.rds_username
+  # password               = var.rds_password 
+  password               = random_password.db_password.result
   parameter_group_name   = aws_db_parameter_group.db_parameter_group.name
   vpc_security_group_ids = [aws_security_group.rds_security_group.id]
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
   publicly_accessible    = false
   skip_final_snapshot    = true
+
+  # encryption with KMS key
+  storage_encrypted = true
+  kms_key_id        = aws_kms_key.rds_key.arn
 
   tags = {
     Name = "csye6225-rds"

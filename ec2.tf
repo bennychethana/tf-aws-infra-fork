@@ -46,6 +46,7 @@ resource "aws_security_group" "webapp_security_group" {
   depends_on = [aws_vpc.vpc]
 }
 
+// commented out the below block as we are using LB to route the traffic.
 # resource "aws_instance" "webapp_instance" {
 #   ami                         = var.ami_id
 #   instance_type               = var.ec2_instance_type

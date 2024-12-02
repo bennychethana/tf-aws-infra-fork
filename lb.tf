@@ -1,13 +1,14 @@
 resource "aws_security_group" "load_balancer_sg" {
   vpc_id = aws_vpc.vpc.id
 
-  ingress {
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"] # Allow HTTP from anywhere
-    ipv6_cidr_blocks = ["::/0"]
-  }
+  // commented out the below block as we are using SSL
+  # ingress {
+  #   from_port        = 80
+  #   to_port          = 80
+  #   protocol         = "tcp"
+  #   cidr_blocks      = ["0.0.0.0/0"] # Allow HTTP from anywhere
+  #   ipv6_cidr_blocks = ["::/0"]
+  # }
 
   ingress {
     from_port        = 443
@@ -63,13 +64,13 @@ resource "aws_lb_target_group" "webapp_tg" {
   }
 }
 
-resource "aws_lb_listener" "webapp_listener" {
-  load_balancer_arn = aws_lb.webapp_lb.arn
-  port              = 80
-  protocol          = "HTTP"
+# resource "aws_lb_listener" "webapp_listener" {
+#   load_balancer_arn = aws_lb.webapp_lb.arn
+#   port              = 80
+#   protocol          = "HTTP"
 
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.webapp_tg.arn
-  }
-}
+#   default_action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.webapp_tg.arn
+#   }
+# }

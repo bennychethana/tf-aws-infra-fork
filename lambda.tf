@@ -1,3 +1,17 @@
+resource "aws_secretsmanager_secret" "email_credentials" {
+  name                    = "email-service-credentials-fixed"
+  recovery_window_in_days = 0
+  kms_key_id              = aws_kms_key.email_secrets_key.key_id
+}
+
+resource "aws_secretsmanager_secret_version" "email_credentials" {
+  secret_id = aws_secretsmanager_secret.email_credentials.id
+  secret_string = jsonencode({
+    SENDGRID_API_KEY = var.sendgrid_api_key
+    WEBAPP_DOMAIN    = var.domain_name
+  })
+}
+
 resource "aws_lambda_function" "user_verification_lambda" {
   function_name = var.lambda_function_name
   role          = aws_iam_role.lambda_execution_role.arn
@@ -14,21 +28,14 @@ resource "aws_lambda_function" "user_verification_lambda" {
   #   s3_bucket = "myawsbucketbenny"
   #   s3_key    = var.lambda_file_path
 
-  environment {
-    variables = {
-      SENDGRID_API_KEY = var.sendgrid_api_key
-      WEBAPP_DOMAIN    = var.domain_name
-      #   RDS_DB_NAME      = var.db_name
-      #   RDS_USER         = var.db_username
-      #   RDS_PASSWORD     = var.db_password
-      #   RDS_HOST         = aws_db_instance.csye6225_appdb.address
-    }
-  }
-
-  #   vpc_config {
-  #     subnet_ids         = aws_subnet.public_subnets[*].id
-  #     security_group_ids = [aws_security_group.lambda_sg.id]
+  // Commenting as we are using secrets manager now 
+  # environment {
+  #   variables = {
+  #     SENDGRID_API_KEY = var.sendgrid_api_key
+  #     WEBAPP_DOMAIN    = var.domain_name
   #   }
+  # }
+
 }
 
 resource "aws_lambda_permission" "allow_sns_invoke" {
@@ -100,4 +107,35 @@ resource "aws_iam_policy" "cloudwatch_logs_policy" {
 resource "aws_iam_role_policy_attachment" "attach_cloudwatch_logs_policy" {
   role       = aws_iam_role.lambda_execution_role.name
   policy_arn = aws_iam_policy.cloudwatch_logs_policy.arn
+}
+
+# Create an IAM policy for Lambda to access Secrets Manager and KMS
+resource "aws_iam_policy" "lambda_secrets_manager_policy" {
+  name        = "LambdaSecretsManagerPolicy"
+  description = "Policy to allow Lambda function to retrieve secrets from Secrets Manager and use KMS"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = aws_secretsmanager_secret.email_credentials.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = "kms:Decrypt"
+        Resource = aws_kms_key.email_secrets_key.arn
+      }
+    ]
+  })
+}
+
+# Attach the policy to the Lambda IAM role
+resource "aws_iam_role_policy_attachment" "lambda_secrets_manager_policy_attachment" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = aws_iam_policy.lambda_secrets_manager_policy.arn
 }

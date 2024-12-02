@@ -1,4 +1,5 @@
 locals {
+  db_password      = jsondecode(aws_secretsmanager_secret_version.db_password.secret_string).password
   user_data_script = <<-EOF
       #!/bin/bash
       LOG_DIR="/home/csye6225/webapp/logs"
@@ -19,10 +20,13 @@ locals {
       echo "Starting user data script..." >> "$LOG_FILE"
 
       echo "Setting environment variables..." >> "$LOG_FILE"
+
+      echo "DATABASE_PASSWORD================='${local.db_password}'" >> "$LOG_FILE"
+      
       {
         echo "DATABASE_HOST='${aws_db_instance.rds_instance.address}'" >> /etc/environment
         echo "DATABASE_USER='${var.rds_username}'" >> /etc/environment
-        echo "DATABASE_PASSWORD='${var.rds_password}'" >> /etc/environment
+        echo "DATABASE_PASSWORD='${local.db_password}'" >> /etc/environment
         echo "DATABASE_NAME='${var.rds_name}'" >> /etc/environment
         echo "DATABASE_PORT='${var.rds_port}'" >> /etc/environment
         echo "S3_BUCKET_NAME='${aws_s3_bucket.webapp_bucket.bucket}'" >> /etc/environment
@@ -127,6 +131,8 @@ resource "aws_launch_template" "webapp_launch_template" {
       volume_size           = var.ec2_intance_volume_size
       volume_type           = var.ec2_volume_type
       delete_on_termination = true
+      encrypted             = true
+      kms_key_id            = aws_kms_key.ec2_key.arn
     }
   }
 

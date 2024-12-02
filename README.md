@@ -28,6 +28,16 @@ NOTE: availability zones will be fetched dynamically. The CIDR for the subnets w
 
 Adding an ec2 resource which will launched with the custom image we built using packer
 
+## Commands to import SSL certificate
+- sudo openssl genrsa -out private.key 2048
+- sudo openssl req -new -key private.key -out csr.pem
+- openssl rsa -in private.key -text > private_Key.pem
+- aws acm import-certificate \
+    --certificate fileb://demo_webappbybenny_certificate.pem \
+    --private-key fileb://private_key.pem \
+    --certificate-chain fileb://demo_webappbybenny_certificate.pem \
+    --region us-east-1
+
 ## Terraform Commands
 
 - `terraform init`
