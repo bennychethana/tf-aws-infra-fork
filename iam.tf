@@ -50,6 +50,37 @@ resource "aws_iam_role_policy_attachment" "s3_access_policy_attachment" {
   policy_arn = aws_iam_policy.s3_access_policy.arn
 }
 
+# Create an IAM policy for EC2 to access Secrets Manager and KMS
+resource "aws_iam_policy" "ec2_secrets_manager_policy" {
+  name        = "EC2SecretsManagerPolicy"
+  description = "Policy to allow EC2 instance to retrieve secrets from Secrets Manager and use KMS"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = aws_secretsmanager_secret.db_password.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = "kms:Decrypt"
+        Resource = aws_kms_key.db_secrets_key.arn
+      }
+    ]
+  })
+}
+
+# Attach the policy to the EC2 IAM role
+resource "aws_iam_role_policy_attachment" "ec2_secrets_manager_policy_attachment" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.ec2_secrets_manager_policy.arn
+}
+
 # Create IAM instance profile for the combined role
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "EC2InstanceProfileWithCloudWatchAndS3Access"

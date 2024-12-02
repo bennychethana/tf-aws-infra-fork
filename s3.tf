@@ -7,6 +7,18 @@ resource "aws_s3_bucket" "webapp_bucket" {
   force_destroy = true # Allows Terraform to delete non-empty bucket
 }
 
+# Enable kms encryption for the bucket
+resource "aws_s3_bucket_server_side_encryption_configuration" "example" {
+  bucket = aws_s3_bucket.webapp_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.s3_key.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
 # Make the bucket private
 resource "aws_s3_bucket_public_access_block" "webapp_bucket_access" {
   bucket = aws_s3_bucket.webapp_bucket.id
@@ -18,15 +30,15 @@ resource "aws_s3_bucket_public_access_block" "webapp_bucket_access" {
 }
 
 # Enable default encryption
-resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_encryption" {
-  bucket = aws_s3_bucket.webapp_bucket.id
+# resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_encryption" {
+#   bucket = aws_s3_bucket.webapp_bucket.id
 
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
+#   rule {
+#     apply_server_side_encryption_by_default {
+#       sse_algorithm = "AES256"
+#     }
+#   }
+# }
 
 # Lifecycle rule for transitioning objects to STANDARD_IA after 30 days
 resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
